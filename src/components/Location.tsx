@@ -11,6 +11,12 @@ import { useEditMode } from "@/contexts/EditModeContext"
 import { useRoadDistances } from "@/hooks/use-road-distances"
 import { useRegisterRefresh } from "@/contexts/RefreshContext"
 
+// ─── Example: Using .env variables ─────────────────────────────────────────────
+// Access environment variables like this:
+// const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+// Example: const mapsUrl = `https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}`
+// Make sure to add VITE_ prefix for client-side variables in .env file
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface DeliveryPoint {
   code: string
@@ -696,6 +702,11 @@ export function DeliveryTableDialog() {
 
       {/* ── Toolbar ─────────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-center gap-2 px-4 py-2.5 border-b bg-muted/40 shrink-0">
+        {!loading && !error && (
+          <span className="text-[10px] font-semibold text-muted-foreground tabular-nums shrink-0">
+            {displayed.length} / {totalPoints} point(s) · {routes.length} route(s)
+          </span>
+        )}
         {!loading && !error && dupCodeCount > 0 && (
           <span className="flex items-center gap-1 text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 px-2 py-1 rounded-full">
             <AlertTriangle className="w-3 h-3" />{dupCodeCount} dup code
@@ -1010,11 +1021,6 @@ export function DeliveryTableDialog() {
 
       {/* ── Search + Filter Bar ─────────────────────────────────────── */}
       <div className="flex items-center gap-2 px-4 py-2 border-b bg-muted/20 shrink-0">
-        {!loading && !error && (
-          <span className="text-[10px] font-semibold text-muted-foreground tabular-nums shrink-0">
-            {displayed.length} / {totalPoints} point(s) · {routes.length} route(s)
-          </span>
-        )}
         <div className="relative flex-1 min-w-[140px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
           <Input
