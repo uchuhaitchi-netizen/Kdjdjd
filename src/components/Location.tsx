@@ -1317,8 +1317,8 @@ export function DeliveryTableDialog() {
         const tbodyKey = `${search}|${[...filterRoutes].sort().join(',')}|${[...filterDeliveries].sort().join(',')}|${sortKey}|${sortDir}`
         return (
         <div className="flex-1 overflow-auto min-h-0" style={{ animation: 'loc-table-fade 0.3s ease-out both' }}>
-          <table className="border-collapse text-[10px] whitespace-nowrap min-w-max w-full">
-            <thead className="sticky top-0 z-10 bg-muted/80 backdrop-blur-sm text-[10px] uppercase tracking-wider text-muted-foreground font-semibold border-b border-border">
+          <table className="border-collapse text-[11px] whitespace-nowrap min-w-max w-full">
+            <thead className="sticky top-0 z-10 bg-muted/80 backdrop-blur-sm text-[11px] uppercase tracking-wider text-muted-foreground font-semibold border-b border-border">
               <tr>
                 {visibleColumns.has("no")       && <th className="px-3 py-3 text-center w-10">#</th>}
                 {visibleColumns.has("route")    && <th className="px-3 py-3 text-center">Route</th>}
@@ -1356,12 +1356,12 @@ export function DeliveryTableDialog() {
                     )}
                     {visibleColumns.has("route") && (
                       <td className="px-3 py-2 text-center">
-                        <span className="text-[10px] text-foreground">{pt.routeName}</span>
+                        <span className="text-[11px] text-foreground">{pt.routeName}</span>
                       </td>
                     )}
                     {visibleColumns.has("code") && (
                       <td className="px-3 py-2 text-center">
-                        <span className={cn("text-[10px] font-medium", pt._dupCode && "text-amber-600 dark:text-amber-400 font-bold")}>
+                        <span className={cn("text-[11px] font-medium", pt._dupCode && "text-amber-600 dark:text-amber-400 font-bold")}>
                           {pt.code}
                         </span>
                         {pt._dupCode && <AlertTriangle className="inline w-3 h-3 ml-1 text-amber-500" />}
@@ -1369,19 +1369,19 @@ export function DeliveryTableDialog() {
                     )}
                     {visibleColumns.has("name") && (
                       <td className="px-3 py-2 text-center">
-                        <span className={cn("text-[10px]", pt._dupName && "text-rose-600 dark:text-rose-400 font-semibold")}>
+                        <span className={cn("text-[11px]", pt._dupName && "text-rose-600 dark:text-rose-400 font-semibold")}>
                           {pt.name}
                         </span>
                         {pt._dupName && <AlertTriangle className="inline w-3 h-3 ml-1 text-rose-500" />}
                       </td>
                     )}
                     {visibleColumns.has("delivery") && (
-                      <td className="px-3 py-2 text-center text-[10px]">
+                      <td className="px-3 py-2 text-center text-[11px]">
                         {effectiveDelivery(pt)}
                       </td>
                     )}
                     {visibleColumns.has("km") && (
-                      <td className="px-3 py-2 text-center text-[10px] tabular-nums text-muted-foreground">
+                      <td className="px-3 py-2 text-center text-[11px] tabular-nums text-muted-foreground">
                         {pointDistances.get(pointKey(pt)) ?? ""}
                       </td>
                     )}
