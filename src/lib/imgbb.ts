@@ -5,10 +5,13 @@ export const LS_IMGBB_KEY = "app_imgbb_api_key"
  * This keeps the API key server-side only
  */
 export async function uploadImageToImgBB(file: File): Promise<string> {
+  const imgbbKey = localStorage.getItem(LS_IMGBB_KEY)
+  if (!imgbbKey) throw new Error("ImgBB API key not configured")
+
   const formData = new FormData()
   formData.append("image", file)
 
-  const response = await fetch(`/api/upload`, {
+  const response = await fetch(`/api/upload?key=${encodeURIComponent(imgbbKey)}`, {
     method: "POST",
     body: formData,
   })

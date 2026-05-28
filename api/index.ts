@@ -154,6 +154,48 @@ async function handleProxyImage(req: VercelRequest, res: VercelResponse) {
   return res.status(200).send(Buffer.from(buffer));
 }
 
+// ── /api/upload ───────────────────────────────────────────────────────────────
+async function handleUpload(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ success: false, error: `Method ${req.method} tidak dibenarkan` });
+  }
+
+  const key =
+    typeof req.headers['x-imgbb-key'] === 'string'
+      ? req.headers['x-imgbb-key']
+      : typeof req.query.key === 'string'
+      ? req.query.key
+      : process.env.IMGBB_API_KEY;
+
+  if (!key) {
+    return res.status(500).json({ success: false, error: 'ImgBB API key not configured' });
+  }
+
+  const headers: Record<string, string> = {};
+  if (req.headers['content-type']) {
+    headers['Content-Type'] = req.headers['content-type'];
+  }
+
+  const uploadResponse = await fetch(
+    `https://api.imgbb.com/1/upload?key=${encodeURIComponent(key)}`,
+    {
+      method: 'POST',
+      body: req,
+      headers,
+    }
+  );
+
+  const payload = await uploadResponse.json().catch(() => null);
+  if (!uploadResponse.ok || !payload?.success) {
+    return res.status(uploadResponse.status).json({
+      success: false,
+      error: payload?.error?.message ?? payload?.error ?? 'Upload failed',
+    });
+  }
+
+  return res.status(200).json({ success: true, data: { url: payload.data?.url } });
+}
+
 // ── /api/rooster ──────────────────────────────────────────────────────────────
 async function handleRooster(req: VercelRequest, res: VercelResponse) {
   await sql`CREATE TABLE IF NOT EXISTS rooster_resources (
@@ -295,6 +337,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       case 'notes':       return await handleNotes(req, res);
       case 'plano':       return await handlePlano(req, res);
       case 'proxy-image': return await handleProxyImage(req, res);
+      case 'upload':      return await handleUpload(req, res);
       case 'rooster':     return await handleRooster(req, res);
       case 'route-notes': return await handleRouteNotes(req, res);
       case 'routes':      return await handleRoutes(req, res);

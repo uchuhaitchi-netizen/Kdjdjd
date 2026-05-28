@@ -557,7 +557,7 @@ function SidebarMenuSub({ className, ...props }: React.ComponentProps<"ul">) {
       data-slot="sidebar-menu-sub"
       data-sidebar="menu-sub"
       className={cn(
-        "border-sidebar-border mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-l px-2.5 py-1",
+        "border-sidebar-border ml-5 mr-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-l px-2.5 py-1",
         "group-data-[collapsible=icon]:hidden",
         className
       )}
@@ -600,10 +600,10 @@ function SidebarMenuSubButton({
       data-size={size}
       data-active={isActive}
       className={cn(
-        "text-sidebar-foreground ring-sidebar-ring hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground [&>svg]:text-sidebar-accent-foreground flex min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-3 py-2 outline-hidden focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 transition-[background-color,color,box-shadow] duration-150",
+        "text-sidebar-foreground ring-sidebar-ring hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground [&>svg]:text-sidebar-accent-foreground flex min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-3 py-2 outline-hidden focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 transition-[background-color,color,box-shadow] duration-150 font-medium",
         "data-[active=true]:bg-sidebar-primary/10 data-[active=true]:text-sidebar-primary data-[active=true]:font-semibold data-[active=true]:shadow-[inset_0_0_0_1px_hsl(var(--sidebar-primary)/0.24)] dark:data-[active=true]:bg-sidebar-primary/16 dark:data-[active=true]:shadow-[inset_0_0_0_1px_hsl(var(--sidebar-primary)/0.34)]",
         size === "sm" && "text-[11px]",
-        size === "md" && "text-[12.5px]",
+        size === "md" && "text-[13px]",
         "group-data-[collapsible=icon]:hidden",
         className
       )}

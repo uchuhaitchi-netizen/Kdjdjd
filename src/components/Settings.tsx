@@ -49,7 +49,7 @@ const LOCAL_STORAGE_ITEMS: StorageLocationItem[] = [
   { section: "Route List Map", store: "fcalendar_map_style", purpose: "Stores map mode selection (streets/satellite/OSM)." },
   { section: "Route List Table", store: "fcalendar_route_columns", purpose: "Stores table column layout per route or globally." },
   { section: "Route List Sorting", store: "fcalendar_my_sorts_<routeId>", purpose: "Stores custom row order/sorting presets per route." },
-  { section: "Settings", store: "mapMarkerDefaultView, app_imgbb_api_key", purpose: "Stores default map coordinates and ImgBB API key." },
+  { section: "Settings", store: "mapMarkerDefaultView, app_imgbb_api_key, settings_profile", purpose: "Stores default map coordinates, ImgBB API key, and saved user profile." },
 ]
 
 const SESSION_STORAGE_ITEMS: StorageLocationItem[] = [
@@ -59,6 +59,7 @@ const SESSION_STORAGE_ITEMS: StorageLocationItem[] = [
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const LS_DEFAULT_VIEW = "mapMarkerDefaultView"
+const LS_PROFILE = "settings_profile"
 const MAP_FALLBACK = { lat: "3.0695500", lng: "101.5469179", zoom: "12" }
 
 // ─── Sidebar nav ──────────────────────────────────────────────────────────────
@@ -104,7 +105,23 @@ export function Settings({ section = "profile" }: { section?: SectionId }) {
   }, [appFont])
 
   // Profile state
-  const [profile, setProfile] = useState({ name: "John Doe", email: "john.doe@speedparcel.com", phone: "+60 12-345 6789", role: "Delivery Manager" })
+  const defaultProfile = { name: "John Doe", email: "john.doe@speedparcel.com", phone: "+60 12-345 6789", role: "Delivery Manager" }
+  const [profile, setProfile] = useState(() => {
+    try {
+      const stored = localStorage.getItem(LS_PROFILE)
+      if (!stored) return defaultProfile
+      const parsed = JSON.parse(stored)
+      return {
+        name: typeof parsed.name === 'string' ? parsed.name : defaultProfile.name,
+        email: typeof parsed.email === 'string' ? parsed.email : defaultProfile.email,
+        phone: typeof parsed.phone === 'string' ? parsed.phone : defaultProfile.phone,
+        role: typeof parsed.role === 'string' ? parsed.role : defaultProfile.role,
+      }
+    } catch {
+      return defaultProfile
+    }
+  })
+  const profileOriginalRef = useRef(profile)
   const [copiedField, setCopiedField] = useState<string | null>(null)
 
   const copyToClipboard = (field: string, value: string) => {
@@ -126,6 +143,11 @@ export function Settings({ section = "profile" }: { section?: SectionId }) {
   const [imgbbKey, setImgbbKey] = useState(() => localStorage.getItem(LS_IMGBB_KEY) ?? "")
   const [showImgbbKey, setShowImgbbKey] = useState(false)
   const imgbbOriginalRef = useRef(imgbbKey)
+
+  const handleSaveProfile = () => {
+    localStorage.setItem(LS_PROFILE, JSON.stringify(profile))
+    profileOriginalRef.current = profile
+  }
 
   const handleSaveImgbbKey = () => {
     localStorage.setItem(LS_IMGBB_KEY, imgbbKey)
@@ -196,10 +218,22 @@ export function Settings({ section = "profile" }: { section?: SectionId }) {
     mapZoom !== mapOriginalRef.current.zoom
   ), [mapLat, mapLng, mapZoom])
 
+  const profileDirty = useMemo(() => {
+    const original = profileOriginalRef.current
+    return (
+      profile.name !== original.name ||
+      profile.email !== original.email ||
+      profile.phone !== original.phone ||
+      profile.role !== original.role
+    )
+  }, [profile])
+
   const imgbbDirty = useMemo(() => imgbbKey !== imgbbOriginalRef.current, [imgbbKey])
 
   const settingsDirty = useMemo(() => {
     switch (active) {
+      case "profile":
+        return profileDirty
       case "map-defaultview":
         return mapDirty
       case "route-colors":
@@ -209,10 +243,13 @@ export function Settings({ section = "profile" }: { section?: SectionId }) {
       default:
         return false
     }
-  }, [active, imgbbDirty, mapDirty, routesListDirty])
+  }, [active, profileDirty, imgbbDirty, mapDirty, routesListDirty])
 
   const saveActiveSection = useCallback(async () => {
     switch (active) {
+      case "profile":
+        if (profileDirty) handleSaveProfile()
+        break
       case "map-defaultview":
         if (mapDirty) handleSaveMap()
         break
@@ -225,7 +262,7 @@ export function Settings({ section = "profile" }: { section?: SectionId }) {
       default:
         break
     }
-  }, [active, imgbbDirty, mapDirty, routesListDirty, mapLat, mapLng, mapZoom, imgbbKey, routesList])
+  }, [active, profileDirty, imgbbDirty, mapDirty, routesListDirty, mapLat, mapLng, mapZoom, imgbbKey, profile, routesList])
 
   useEffect(() => {
     if (!isEditMode || !settingsDirty) return
