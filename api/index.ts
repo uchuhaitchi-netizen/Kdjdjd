@@ -11,7 +11,7 @@ const sql = neon(process.env.DATABASE_URL);
 function setCors(res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-imgbb-key');
 }
 
 // ── /api/calendar ─────────────────────────────────────────────────────────────
@@ -175,21 +175,33 @@ async function handleUpload(req: VercelRequest, res: VercelResponse) {
   if (req.headers['content-type']) {
     headers['Content-Type'] = req.headers['content-type'];
   }
+  if (typeof req.headers['content-length'] === 'string') {
+    headers['Content-Length'] = req.headers['content-length'];
+  }
+
+  const bodyBuffer = await new Promise<Buffer>((resolve, reject) => {
+    const chunks: Uint8Array[] = [];
+    req.on('data', chunk => chunks.push(Buffer.from(chunk)));
+    req.on('end', () => resolve(Buffer.concat(chunks)));
+    req.on('error', reject);
+  });
 
   const uploadResponse = await fetch(
     `https://api.imgbb.com/1/upload?key=${encodeURIComponent(key)}`,
     {
       method: 'POST',
-      body: req,
       headers,
+      body: bodyBuffer,
     }
   );
 
   const payload = await uploadResponse.json().catch(() => null);
   if (!uploadResponse.ok || !payload?.success) {
-    return res.status(uploadResponse.status).json({
+    const message = payload?.error?.message ?? payload?.error ?? 'Upload failed';
+    console.error('[api/upload] ImgBB upload failed', { status: uploadResponse.status, message, payload });
+    return res.status(uploadResponse.status || 502).json({
       success: false,
-      error: payload?.error?.message ?? payload?.error ?? 'Upload failed',
+      error: message,
     });
   }
 

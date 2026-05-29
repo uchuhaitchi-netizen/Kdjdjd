@@ -11,8 +11,12 @@ export async function uploadImageToImgBB(file: File): Promise<string> {
   const formData = new FormData()
   formData.append("image", file)
 
-  const response = await fetch(`/api/upload?key=${encodeURIComponent(imgbbKey)}`, {
+  const response = await fetch(`/api/upload`, {
     method: "POST",
+    headers: {
+      "x-imgbb-key": imgbbKey,
+      "Accept": "application/json",
+    },
     body: formData,
   })
 
