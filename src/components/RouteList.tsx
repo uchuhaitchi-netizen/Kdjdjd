@@ -1314,6 +1314,54 @@ export function RouteList({ variant = 'route-list' }: RouteListProps) {
     setRowOrderError('')
   }
 
+  const optimizeRouteSort = () => {
+    const route = routes.find((r) => r.id === currentRouteId)
+    if (!route) return
+
+    const points = route.deliveryPoints || []
+    const hasCoord = (pt: DeliveryPoint) => Number.isFinite(pt.latitude) && Number.isFinite(pt.longitude)
+    const validPoints = points.filter(hasCoord)
+    if (validPoints.length <= 1) {
+      toast.error("Not enough valid route points to optimize.")
+      return
+    }
+
+    const remaining = [...validPoints]
+    const optimized: DeliveryPoint[] = []
+    let current = remaining.shift()!
+    optimized.push(current)
+
+    while (remaining.length > 0) {
+      let nearestIndex = 0
+      let nearestDistance = Number.POSITIVE_INFINITY
+      for (let i = 0; i < remaining.length; i += 1) {
+        const target = remaining[i]
+        const distance = haversineKm(current.latitude, current.longitude, target.latitude, target.longitude)
+        if (distance < nearestDistance) {
+          nearestDistance = distance
+          nearestIndex = i
+        }
+      }
+      current = remaining.splice(nearestIndex, 1)[0]
+      optimized.push(current)
+    }
+
+    const invalidPoints = points.filter((pt) => !hasCoord(pt))
+    const order = [...optimized, ...invalidPoints].map((point) => point.code)
+    const id = `optimized-${Date.now()}`
+    const label = `Optimized Route (${new Date().toLocaleTimeString()})`
+    const newEntry = { id, label, order }
+
+    setSavedRowOrders((prev) => {
+      const updated = [...prev, newEntry]
+      persistSavedRowOrders(updated, currentRouteId)
+      return updated
+    })
+    setDraftSort({ type: 'saved', id })
+    setActiveSortConfig({ type: 'saved', id })
+    toast.success("Route optimized and saved to Sorting.")
+  }
+
   const startRenameSavedOrder = (id: string, currentLabel: string) => {
     setEditingSavedOrderId(id)
     setEditingSavedOrderName(currentLabel)
@@ -4880,6 +4928,23 @@ export function RouteList({ variant = 'route-list' }: RouteListProps) {
                         </button>
                       )
                     })}
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-border bg-background p-3">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Optimize Route</p>
+                      <p className="text-xs text-muted-foreground">Generate a nearest-neighbor route order and save it as a custom sort.</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={optimizeRouteSort}
+                      className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-muted/60"
+                    >
+                      <Truck className="size-4" />
+                      Optimize Route
+                    </button>
                   </div>
                 </div>
 

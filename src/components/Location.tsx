@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react"
-import { Link, Loader2, AlertCircle, AlertTriangle, Search, X, ChevronUp, ChevronDown as ChevronDownIcon, ChevronsUpDown, Filter, Check, Columns2, Info, Copy, Trash2, ExternalLink, Bookmark, Pencil, CheckCheck, Navigation2, LayoutList } from "lucide-react"
+import { Link, Loader2, AlertCircle, AlertTriangle, Search, X, ChevronUp, ChevronDown as ChevronDownIcon, ChevronsUpDown, Filter, Check, Columns2, Info, Copy, Trash2, ExternalLink, Bookmark, Pencil, CheckCheck, Navigation2, LayoutList, MapPin } from "lucide-react"
 import { toast } from "sonner"
 import { cn, parseSmartQuery, isDeliveryActive } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { DeliveryMap } from "@/components/DeliveryMap"
 import { RowInfoModal } from "@/components/RowInfoModal"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -544,6 +545,13 @@ export function DeliveryTableDialog() {
     return distances
   }, [displayed, locationRoadDistances])
 
+  const [showMap, setShowMap] = useState(false)
+  const [mapResizeToken, setMapResizeToken] = useState(0)
+
+  useEffect(() => {
+    if (showMap) setMapResizeToken(token => token + 1)
+  }, [showMap])
+
   const [savedLinks, setSavedLinks]     = useState<SavedLink[]>(loadSavedLinks)
   const [linksOpen, setLinksOpen]       = useState(false)
   const [isShortening, setIsShortening] = useState(false)
@@ -1052,6 +1060,15 @@ export function DeliveryTableDialog() {
             </span>
           )}
         </button>
+        <Button
+          size="sm"
+          variant={showMap ? "secondary" : "outline"}
+          onClick={() => setShowMap(v => !v)}
+          className="flex items-center gap-1.5 h-9 shrink-0"
+        >
+          <MapPin className="w-3.5 h-3.5" />
+          {showMap ? "Hide Map" : "Show Map"}
+        </Button>
         {/* ── Sort button ───────────────────────────────────────────── */}
         <div className="relative shrink-0">
           <button
@@ -1161,6 +1178,24 @@ export function DeliveryTableDialog() {
             onClick={() => { setFilterRoutes(new Set()); setFilterDeliveries(new Set()) }}
             className="ml-auto text-[10px] text-muted-foreground hover:text-foreground underline shrink-0"
           >Clear all</button>
+        </div>
+      )}
+
+      {showMap && (
+        <div className="px-4 pb-4">
+          <div className="h-[360px] overflow-hidden rounded-3xl border border-border shadow-sm bg-card">
+            <DeliveryMap
+              deliveryPoints={displayed}
+              scrollZoom={true}
+              showPolyline={true}
+              markerStyle="pin"
+              mapStyle="google-streets"
+              startPoint={DEFAULT_MAP_CENTER}
+              includeStartInBounds={false}
+              refitToken={displayed.length}
+              resizeToken={mapResizeToken}
+            />
+          </div>
         </div>
       )}
 

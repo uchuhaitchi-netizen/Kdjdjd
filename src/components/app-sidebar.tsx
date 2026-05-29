@@ -387,11 +387,11 @@ export function AppSidebar({
               <button
                 type="button"
                 onClick={() => setActionOpen(v => !v)}
-                className="w-full flex items-center gap-2.5 rounded-lg border border-sidebar-border/50 bg-sidebar-accent/20 px-3 py-2.5 text-left transition-colors duration-150 hover:bg-sidebar-accent/40"
+                className="w-full flex items-center gap-2.5 rounded-lg border border-sidebar-border/50 bg-sidebar-accent/20 px-3 py-2.5 text-left text-[12.5px] transition-colors duration-150 hover:bg-sidebar-accent/40"
                 style={{ background: actionOpen ? 'hsl(var(--sidebar-accent)/0.5)' : undefined }}
               >
                 <Zap className="size-[15px] shrink-0 text-amber-400" />
-                <span className="flex-1 text-[13px] font-medium text-sidebar-foreground">Action</span>
+                <span className="flex-1 font-medium text-sidebar-foreground">Action</span>
                 <ChevronsUpDown
                   className="size-3.5 shrink-0 text-muted-foreground transition-transform duration-200"
                   style={{ transform: actionOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
@@ -403,17 +403,13 @@ export function AppSidebar({
             <div className="border-t border-sidebar-border/40 mt-1" />
 
             {/* FM Logo */}
-            <button
-              type="button"
-              onClick={() => navigate("home")}
-              className="mx-auto flex items-center justify-center rounded-xl p-1 hover:bg-sidebar-accent/40 transition-colors duration-150"
-            >
+            <div className="mx-auto flex items-center justify-center rounded-xl p-1 transition-colors duration-150">
               <img
                 src={fmLogo}
                 alt="FM logo"
                 className="h-[72px] w-[72px] shrink-0 object-contain"
               />
-            </button>
+            </div>
           </SidebarFooter>
 
         </div>
